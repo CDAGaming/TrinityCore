@@ -166,8 +166,12 @@ enum WorldBoolConfigs
     CONFIG_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA,
     CONFIG_RESET_DUEL_COOLDOWNS,
     CONFIG_RESET_DUEL_HEALTH_MANA,
+<<<<<<< df7554b6ea4dee16853811fe02b4e70fe2c9e957
     CONFIG_BASEMAP_LOAD_GRIDS,
     CONFIG_INSTANCEMAP_LOAD_GRIDS,
+=======
+    CONFIG_RESPAWN_DYNAMIC_ESCORTNPC,
+>>>>>>> Dynamic Creature/Go spawning:
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -192,6 +196,9 @@ enum WorldFloatConfigs
     CONFIG_ARENA_WIN_RATING_MODIFIER_2,
     CONFIG_ARENA_LOSE_RATING_MODIFIER,
     CONFIG_ARENA_MATCHMAKER_RATING_MODIFIER,
+    CONFIG_RESPAWN_DYNAMICRADIUS,
+    CONFIG_RESPAWN_DYNAMICRATE_CREATURE,
+    CONFIG_RESPAWN_DYNAMICRATE_GAMEOBJECT,
     FLOAT_CONFIG_VALUE_COUNT
 };
 
@@ -361,6 +368,16 @@ enum WorldIntConfigs
     CONFIG_AUCTION_GETALL_DELAY,
     CONFIG_AUCTION_SEARCH_DELAY,
     CONFIG_TALENTS_INSPECTING,
+    CONFIG_RESPAWN_MINCELLCHECKMS,
+    CONFIG_RESPAWN_DYNAMICMODE,
+    CONFIG_RESPAWN_GUIDWARNLEVEL,
+    CONFIG_RESPAWN_GUIDALERTLEVEL,
+    CONFIG_RESPAWN_RESTARTQUIETTIME,
+    CONFIG_RESPAWN_ACTIVITYSCOPECREATURE,
+    CONFIG_RESPAWN_ACTIVITYSCOPEGAMEOBJECT,
+    CONFIG_RESPAWN_DYNAMICMINIMUM_CREATURE,
+    CONFIG_RESPAWN_DYNAMICMINIMUM_GAMEOBJECT,
+    CONFIG_RESPAWN_GUIDWARNING_FREQUENCY,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -763,6 +780,10 @@ class World
         void ReloadRBAC();
 
         void RemoveOldCorpses();
+        void TriggerGuidWarning();
+        void TriggerGuidAlert();
+        bool isGuidWarning() { return guidWarn; }
+        bool isGuidAlert() { return guidAlert; }
 
     protected:
         void _UpdateGameTime();
@@ -866,7 +887,21 @@ class World
         void LoadCharacterInfoStore();
 
         void ProcessQueryCallbacks();
+
+        void SendGuidWarning();
+        void DoGuidWarningRestart();
+        void DoGuidAlertRestart();
         std::deque<std::future<PreparedQueryResult>> m_realmCharCallbacks;
+
+        std::string respawnWarningMsg;
+        std::string alertRestartReason;
+
+        std::mutex _guidAlertLock;
+
+        bool guidWarn;
+        bool guidAlert;
+        uint32 warnDiff;
+        time_t warnShutdownTime;
 };
 
 extern Realm realm;
