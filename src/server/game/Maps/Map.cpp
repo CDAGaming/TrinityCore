@@ -3361,14 +3361,7 @@ void Map::RespawnCellAreaZoneGameObject(uint32 cellZoneAreaId)
 
     rv.clear();
     if (GetGameObjectRespawnInfo(rv, 0, 0, cellZoneAreaId))
-    {
-        for (RespawnInfo* ri : rv)
-        {
-            int32 const origTime = ri->originalRespawnTime - time(NULL);
-            int32 const newTime = ri->respawnTime - time(NULL);
-        }
         RespawnGameObjectList(rv);
-    }
 }
 
 bool Map::GetRespawnData(RespawnVector& results, RespawnObjectType type, bool onlyDue, uint32 spawnId, uint32 grid, bool allMap, float x, float y, float z)

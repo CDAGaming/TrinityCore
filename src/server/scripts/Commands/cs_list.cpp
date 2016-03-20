@@ -653,7 +653,7 @@ public:
 
         bool scopeOnly = true;
 
-        if (*args && args == "*")
+        if (*args && strcmp(args,"*") == 0)
             scopeOnly = true;
 
         RespawnVector respawns;
