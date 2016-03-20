@@ -554,10 +554,7 @@ enum TrinityStrings
     LANG_NPCINFO_VENDOR                 = 545,
     LANG_NPCINFO_TRAINER                = 546,
     LANG_NPCINFO_DUNGEON_ID             = 547,
-    LANG_NPCINFO_GROUP_ID               = 1500,
-    LANG_NPCINFO_COMPATIBILITY_MODE     = 1501,
 
-    LANG_NPCSPAWNGROUP_BADGROUP         = 1507,
     //                                  = 548, see LANG_PINFO_GM_ACTIVE
     //                                  = 549, see LANG_PINFO_BANNED
     //                                  = 550, see LANG_PINFO_MUTED
@@ -1087,12 +1084,6 @@ enum TrinityStrings
     LANG_GOINFO_DISPLAYID               = 5026,
     LANG_GOINFO_NAME                    = 5027,
     LANG_GOINFO_LOOTID                  = 5028,
-    LANG_GOINFO_GROUP_ID                = 1502,
-    LANG_GOINFO_COMPATIBILITY_MODE      = 1503,
-    LANG_GOINFO_GUIDINFO                = 1504,
-    LANG_GOINFO_SPAWNID_LOCATION        = 1505,
-    LANG_GOINFO_DISTANCEFROMPLAYER      = 1506,
-    LANG_GOSPAWNGROUP_BADGROUP          = 1508,
     LANG_COMMAND_LOOKUP_MAX_RESULTS     = 5029,
     LANG_UNAUTHORIZED                   = 5030,
     LANG_NPCINFO_AIINFO                 = 5031,
@@ -1131,7 +1122,24 @@ enum TrinityStrings
     LANG_COMMAND_MUTEHISTORY_EMPTY      = 5060,
     LANG_COMMAND_MUTEHISTORY_OUTPUT     = 5061,
 
-    // Room for more Trinity strings      5062-9999
+    // Strings added for dynamic spawns
+    LANG_NPCINFO_GROUP_ID               = 5062,
+    LANG_NPCINFO_COMPATIBILITY_MODE     = 5063,
+    LANG_GOINFO_GROUP_ID                = 5064,
+    LANG_GOINFO_COMPATIBILITY_MODE      = 5065,
+    LANG_GOINFO_GUIDINFO                = 5066,
+    LANG_GOINFO_SPAWNID_LOCATION        = 5067,
+    LANG_GOINFO_DISTANCEFROMPLAYER      = 5068,
+    LANG_NPCSPAWNGROUP_BADGROUP         = 5069,
+    LANG_GOSPAWNGROUP_BADGROUP          = 5070,
+    LANG_LIST_RESPAWNS                  = 5071,
+    LANG_LIST_RESPAWNS_LISTHEADER       = 5072,
+    LANG_LIST_RESPAWNS_LISTDATA         = 5073,
+    LANG_LIST_RESPAWNS_OVERDUE          = 5074,
+    LANG_LIST_RESPAWNS_CREATURES        = 5075,
+    LANG_LIST_RESPAWNS_GAMEOBJECTS      = 5076,
+
+    // Room for more Trinity strings      5077-6603
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

@@ -229,24 +229,31 @@ UPDATE `trinity_string`
 SET `content_default` = '%d - %s X:%f Y:%f Z:%f MapId:%d %s %s'
 WHERE `entry` = 1110;
 
-DELETE FROM `trinity_string` WHERE `entry` BETWEEN 1500 AND 1508;
+DELETE FROM `trinity_string` WHERE `entry` BETWEEN 5062 AND 5077;
 
 -- Add new trinity strings for extra npc/gobject info lines
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
-(1500, 'Group: %u - Flags %u - Active %u'),
-(1501, 'Compatibility Mode: %u'),
-(1502, 'Group: %u - Flags %u - Active %u'),
-(1503, 'Compatibility Mode: %u'),
-(1504, 'GUID: %s'),
-(1505, 'SpawnID: %u, location (%f, %f, %f)'),
-(1506, 'Distance from player %f'),
-(1507, 'Creature group %u not found'),
-(1508, 'GameObject group %u not found');
+(5062, 'Group: %u - Flags %u - Active %u'),
+(5063, 'Compatibility Mode: %u'),
+(5064, 'Group: %u - Flags %u - Active %u'),
+(5065, 'Compatibility Mode: %u'),
+(5066, 'GUID: %s'),
+(5067, 'SpawnID: %u, location (%f, %f, %f)'),
+(5068, 'Distance from player %f'),
+(5069, 'Creature group %u not found'),
+(5070, 'GameObject group %u not found'),
+(5071, 'Listing %s respawns for the current scope'),
+(5072, 'SpawnID Entry   GridXY  Scope Respawn time Orig Respawn'),
+(5073, '%7u %7u [%02u,%02u] %5u %13s %s'),
+(5074, 'overdue'),
+(5075, 'creatures'),
+(5076, 'gameobjects');
 
 -- Add new NPC/Gameobject commands
-DELETE FROM `command` WHERE `name` = 'npc spawngroup' OR `name` = 'npc despawngroup' OR `name` = 'gobject spawngroup' OR `name` = 'gobject despawngroup';
+DELETE FROM `command` WHERE `name` IN ('npc spawngroup', 'npc despawngroup', 'gobject spawngroup', 'gobject despawngroup', 'list respawns');
 INSERT INTO `command` (`name`, `permission`, `help`) VALUES
 ('npc spawngroup', 837, 'Syntax: .npc spawngroup $groupId [ignorerespawn] [force]'),
 ('npc despawngroup', 838, 'Syntax: .npc despawngroup $groupId [removerespawntime]'),
 ('gobject spawngroup', 839, 'Syntax: .gobject spawngroup $groupId [ignorerespawn] [force]'),
-('gobject despawngroup', 840, 'Syntax: .gobject despawngroup $groupId [removerespawntime]');
+('gobject despawngroup', 840, 'Syntax: .gobject despawngroup $groupId [removerespawntime]'),
+('list respawns', 841, 'Syntax: .list respawns [*] (Enter * for all respawns within current map)');

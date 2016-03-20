@@ -46,6 +46,7 @@ public:
             { "object",   rbac::RBAC_PERM_COMMAND_LIST_OBJECT,   true, &HandleListObjectCommand,   "" },
             { "auras",    rbac::RBAC_PERM_COMMAND_LIST_AURAS,   false, &HandleListAurasCommand,    "" },
             { "mail",     rbac::RBAC_PERM_COMMAND_LIST_MAIL,     true, &HandleListMailCommand,     "" },
+            { "respawns", rbac::RBAC_PERM_COMMAND_LIST_MAIL,    false, &HandleListRespawnsCommand, "" },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -635,7 +636,67 @@ public:
             handler->PSendSysMessage(LANG_LIST_MAIL_NOT_FOUND);
         return true;
     }
+
+    static bool HandleListRespawnsCommand(ChatHandler* handler, char const* args)
+    {
+        Player const* player = handler->GetSession()->GetPlayer();
+
+        // We need a player
+        if (!player)
+            return false;
+
+        Map* map = player->GetMap();
+
+        // And we need a map
+        if (!map)
+            return false;
+
+        bool scopeOnly = true;
+
+        if (*args && args == "*")
+            scopeOnly = true;
+
+        RespawnVector respawns;
+        LocaleConstant locale = handler->GetSession()->GetSessionDbcLocale();
+        char const* stringOverdue = sObjectMgr->GetTrinityString(LANG_LIST_RESPAWNS_OVERDUE, locale);
+        char const* stringCreature = sObjectMgr->GetTrinityString(LANG_LIST_RESPAWNS_CREATURES, locale);
+        char const* stringGameobject = sObjectMgr->GetTrinityString(LANG_LIST_RESPAWNS_GAMEOBJECTS, locale);
+
+        if (map->GetRespawnData(respawns, Map::OBJECT_TYPE_CREATURE, false, 0, 0, scopeOnly, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ()))
+        {
+            handler->PSendSysMessage(LANG_LIST_RESPAWNS, stringCreature);
+            handler->PSendSysMessage(LANG_LIST_RESPAWNS_LISTHEADER);
+            for (RespawnInfo* ri : respawns)
+            {
+                uint32 gridY = ri->gridId / MAX_NUMBER_OF_GRIDS;
+                uint32 gridX = ri->gridId - (gridY * MAX_NUMBER_OF_GRIDS);
+
+                std::string respawnTimeOrig = (ri->originalRespawnTime > time(NULL)) ? secsToTimeString(uint64(ri->originalRespawnTime - time(NULL)), true) : stringOverdue;
+                std::string respawnTime = ri->respawnTime > time(NULL) ? secsToTimeString(uint64(ri->respawnTime - time(NULL)), true) : stringOverdue;
+                handler->PSendSysMessage(LANG_LIST_RESPAWNS_LISTDATA, ri->spawnId, ri->entry, gridX, gridY, ri->cellAreaZoneId, respawnTime.c_str(), respawnTimeOrig.c_str());
+            }
+        }
+
+        respawns.clear();
+        if (map->GetRespawnData(respawns, Map::OBJECT_TYPE_GAMEOBJECT, false, 0, 0, scopeOnly, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ()))
+        {
+            handler->PSendSysMessage(LANG_LIST_RESPAWNS, stringGameobject);
+            handler->PSendSysMessage(LANG_LIST_RESPAWNS_LISTHEADER);
+            for (RespawnInfo* ri : respawns)
+            {
+                uint32 gridY = ri->gridId / MAX_NUMBER_OF_GRIDS;
+                uint32 gridX = ri->gridId - (gridY * MAX_NUMBER_OF_GRIDS);
+
+                std::string respawnTimeOrig = ri->originalRespawnTime > time(NULL) ? secsToTimeString(uint64(ri->originalRespawnTime - time(NULL)), true) : stringOverdue;
+                std::string respawnTime = ri->respawnTime > time(NULL) ? secsToTimeString(uint64(ri->respawnTime - time(NULL)), true) : stringOverdue;
+                handler->PSendSysMessage(LANG_LIST_RESPAWNS_LISTDATA, ri->spawnId, ri->entry, gridX, gridY, ri->cellAreaZoneId, respawnTime.c_str(), respawnTimeOrig.c_str());
+            }
+        }
+
+        return true;
+    }
 };
+
 
 void AddSC_list_commandscript()
 {

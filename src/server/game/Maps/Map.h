@@ -559,6 +559,7 @@ class Map : public GridRefManager<NGridType>
             OBJECT_TYPE_CREATURE        = 0,
             OBJECT_TYPE_GAMEOBJECT      = 1
         };
+        bool GetRespawnData(RespawnVector& results, RespawnObjectType type, bool onlyDue = false, uint32 spawnId = 0, uint32 grid = 0, bool allMap = true, float x = 0.0f, float y = 0.0f, float z = 0.0f);
         uint32 GetZoneAreaGridId(RespawnObjectType objectType, float x, float y, float z);
         void LoadRespawnTimes();
         void DeleteRespawnTimes();
@@ -766,7 +767,7 @@ class Map : public GridRefManager<NGridType>
         void RespawnCellAreaZoneGameObject(uint32 cellZoneAreaId);
 
         void addRespawnInfo(respawnInfoMultiMap& gridList, respawnInfoMultiMap& cellAreaZoneList, respawnInfoMap& spawnList, RespawnInfo& Info, bool replace = false);
-        bool getRespawnInfo(respawnInfoMultiMap& gridList, respawnInfoMultiMap& cellAreaZoneList, respawnInfoMap& spawnList, RespawnVector& RespawnData, uint32 spawnId, uint32 gridId = 0, uint32 cellAreaZoneId = 0, bool onlyDue = true);
+        bool getRespawnInfo(respawnInfoMultiMap const& gridList, respawnInfoMultiMap const& cellAreaZoneList, respawnInfoMap const& spawnList, RespawnVector& RespawnData, uint32 spawnId, uint32 gridId = 0, uint32 cellAreaZoneId = 0, bool onlyDue = true);
         void deleteRespawnInfo(respawnInfoMultiMap& gridList, respawnInfoMultiMap& cellAreaZoneList, respawnInfoMap& spawnList, uint32 spawnId, uint32 gridId = 0, uint32 cellAreaZoneId = 0, bool onlyDue = true);
 
         // Type specific code for add/remove to/from grid

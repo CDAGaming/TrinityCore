@@ -696,7 +696,8 @@ public:
         uint32 nativeid = target->GetNativeDisplayId();
         uint32 Entry = target->GetEntry();
 
-        int64 curRespawnDelay = target->GetRespawnTimeEx()-time(NULL);
+        int64 curRespawnDelay = target->GetRespawnCompatibilityMode() ? target->GetRespawnTimeEx() - time(NULL) : target->GetMap()->GetCreatureRespawnTime(target->GetSpawnId()) - time(NULL);
+
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
         std::string curRespawnDelayStr = secsToTimeString(uint64(curRespawnDelay), true);
@@ -778,7 +779,7 @@ public:
                 if (!creatureTemplate)
                     continue;
 
-                handler->PSendSysMessage(LANG_CREATURE_LIST_CHAT, guid, guid, creatureTemplate->Name.c_str(), x, y, z, mapId);
+                handler->PSendSysMessage(LANG_CREATURE_LIST_CHAT, guid, guid, creatureTemplate->Name.c_str(), x, y, z, mapId, "", "");
 
                 ++count;
             }

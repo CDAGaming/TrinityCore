@@ -473,15 +473,10 @@ void GameObject::Update(uint32 diff)
                     }
                 }
             }
-            else
-            {
-                // Despawn and set respawn timer
-                if (m_respawnTime > 0)
-                {
-                    SaveRespawnTime(0, false);
-                    AddObjectToRemoveList();
-                }
-            }
+
+            // Set respawn timer
+            if (!m_respawnCompatibilityMode && m_respawnTime > 0)
+                SaveRespawnTime(0, false);
 
             if (isSpawned())
             {
@@ -668,6 +663,7 @@ void GameObject::Update(uint32 diff)
             if (!m_respawnDelayTime)
                 return;
 
+            // ToDo: Decide if we should properly despawn these. Maybe they expect to be able to manually respawn from script?
             if (!m_spawnedByDefault)
             {
                 m_respawnTime = 0;
@@ -678,11 +674,18 @@ void GameObject::Update(uint32 diff)
             m_respawnTime = time(NULL) + m_respawnDelayTime;
 
             // if option not set then object will be saved at grid unload
+            // Otherwise just save respawn time to map object memory
             if (sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
                 SaveRespawnTime();
-            else if (!m_respawnCompatibilityMode)
+
+            if (!m_respawnCompatibilityMode)
             {
-                SaveRespawnTime(0, false);
+                // Respawn time was just saved if set to save to DB
+                // If not, we save only to map memory
+                if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
+                    SaveRespawnTime(0, false);
+
+                // Then despawn
                 AddObjectToRemoveList();
                 return;
             }
@@ -993,6 +996,10 @@ Unit* GameObject::GetOwner() const
 
 void GameObject::SaveRespawnTime(uint32 forceDelay, bool savetodb)
 {
+    bool haveGoData = false;
+    if (m_goData)
+        haveGoData = true;
+
     if (m_goData && m_respawnTime > time(NULL) && m_spawnedByDefault)
     {
         if (m_respawnCompatibilityMode)

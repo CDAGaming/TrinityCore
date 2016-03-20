@@ -2901,7 +2901,7 @@ void Map::addRespawnInfo(respawnInfoMultiMap& gridList, respawnInfoMultiMap& cel
     }
 }
 
-bool Map::getRespawnInfo(respawnInfoMultiMap& gridList, respawnInfoMultiMap& cellAreaZoneList, respawnInfoMap& spawnList, RespawnVector& RespawnData, uint32 spawnId, uint32 gridId, uint32 cellAreaZoneId, bool onlyDue)
+bool Map::getRespawnInfo(respawnInfoMultiMap const& gridList, respawnInfoMultiMap const& cellAreaZoneList, respawnInfoMap const& spawnList, RespawnVector& RespawnData, uint32 spawnId, uint32 gridId, uint32 cellAreaZoneId, bool onlyDue)
 {
     // If no criteria passed, then return either due respawns, or all respawns
     if (!spawnId && !gridId && !cellAreaZoneId)
@@ -3011,6 +3011,13 @@ void Map::RespawnCreatureList(const RespawnVector& RespawnData, bool force)
 
         for (auto itr = bounds.first; itr != bounds.second; ++itr)
         {
+            // Don't bother if this is a pooled spawn, we don't delete here anyway
+            if (ri->spawnId ? sPoolMgr->IsPartOfAPool<Creature>(ri->spawnId) : 0)
+            {
+                deleteRespawn = false;
+                break;
+            }
+
             Creature* creature = itr->second;
             uint32 groupFlags = 0;
             if (const CreatureData* cdata = creature->GetCreatureData())
@@ -3050,6 +3057,7 @@ void Map::RespawnCreatureList(const RespawnVector& RespawnData, bool force)
             if (!force && poolid)
             {
                 sPoolMgr->UpdatePool<Creature>(poolid, ri->spawnId);
+                RemoveCreatureRespawnTime(ri->spawnDelay);
             }
             else
             {
@@ -3110,8 +3118,11 @@ void Map::RespawnGameObjectList(const RespawnVector& RespawnData, bool force)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     for (RespawnInfo* ri : RespawnData)
     {
-        // Don't spawn if already there and spawned (can happen if grid reloaded)
-        if (GetGameObjectBySpawnId(ri->spawnId))
+        uint32 poolid;
+        poolid = ri->spawnId ? sPoolMgr->IsPartOfAPool<GameObject>(ri->spawnId) : 0;
+
+        // Don't spawn if already there (and not part of a pool) and spawned (can happen if grid reloaded)
+        if (!poolid && GetGameObjectBySpawnId(ri->spawnId))
         {
             RemoveGORespawnTime(ri->spawnId, 0, 0, false, trans);
             continue;
@@ -3121,12 +3132,12 @@ void Map::RespawnGameObjectList(const RespawnVector& RespawnData, bool force)
         time_t linkedRespawntime = GetLinkedRespawnTime(c_guid);
         if (force || !linkedRespawntime)             // Can respawn
         {
-            uint32 poolid;
-            poolid = ri->spawnId ? sPoolMgr->IsPartOfAPool<GameObject>(ri->spawnId) : 0;
 
             if (!force && poolid)
             {
                 sPoolMgr->UpdatePool<GameObject>(poolid, ri->spawnId);
+                RemoveGORespawnTime(ri->spawnId, 0, 0, false, trans);
+                continue;
             }
             else
             {
@@ -3350,7 +3361,38 @@ void Map::RespawnCellAreaZoneGameObject(uint32 cellZoneAreaId)
 
     rv.clear();
     if (GetGameObjectRespawnInfo(rv, 0, 0, cellZoneAreaId))
+    {
+        for (RespawnInfo* ri : rv)
+        {
+            int32 const origTime = ri->originalRespawnTime - time(NULL);
+            int32 const newTime = ri->respawnTime - time(NULL);
+        }
         RespawnGameObjectList(rv);
+    }
+}
+
+bool Map::GetRespawnData(RespawnVector& results, RespawnObjectType type, bool onlyDue, uint32 spawnId, uint32 grid, bool allMap, float x, float y, float z)
+{
+    // Obtain references to appropriate respawn stores
+    respawnInfoMultiMap const& gridList = (type == OBJECT_TYPE_CREATURE) ? _creatureRespawnTimesByGridId : _gameObjectRespawnTimesByGridId;
+    respawnInfoMultiMap const& scopeList = (type == OBJECT_TYPE_CREATURE) ? _creatureRespawnTimesByCellAreaZoneId : _gameObjectRespawnTimesByCellAreaZoneId;
+    respawnInfoMap const& spawnIdList = (type == OBJECT_TYPE_CREATURE) ? _creatureRespawnTimesBySpawnId : _gameObjectRespawnTimesBySpawnId;
+
+    // Spawn ID supplied
+    if (spawnId)
+    {
+        return getRespawnInfo(gridList, scopeList, spawnIdList, results, spawnId, 0, 0, onlyDue);
+    }
+
+    // All map, or grid only
+    if (grid || allMap)
+    {
+        return getRespawnInfo(gridList, scopeList, spawnIdList, results, 0, grid, 0, onlyDue);
+    }
+
+    // By scope
+    uint32 zoneAreaCellId = GetZoneAreaGridId(type, x, y, z);
+    return getRespawnInfo(gridList, scopeList, spawnIdList, results, 0, 0, zoneAreaCellId, onlyDue);
 }
 
 void Map::getPlayersByZone(std::unordered_map<uint32, uint32>& playerZoneMap)
